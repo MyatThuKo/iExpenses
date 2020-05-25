@@ -16,6 +16,9 @@ struct AddView: View {
     @State private var amount = ""
     static let types = ["Personal", "Business"]
     
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
     var body: some View {
         NavigationView {
             Form {
@@ -33,14 +36,25 @@ struct AddView: View {
             .navigationBarTitle("Add a new expense")
             .navigationBarItems(trailing:
                 Button("Save") {
-                    if let actualAmount = Int(self.amount) {
-                        let item = ExpenseItem(name: self.name, type: self.type, amount: actualAmount)
-                        self.expenses.items.append(item)
-                        //this line is needed to trigger the save button and solve the bug
-                        self.expenses.items = self.expenses.items
-                        self.presentationMode.wrappedValue.dismiss()
+                    guard let actualAmount = Double(self.amount) else {
+                        self.alertMessage = "The amount must be a number."
+                        self.showAlert.toggle()
+                        return
                     }
+                    guard !self.name.isEmpty else {
+                        self.alertMessage = "Pleaes provide the item name."
+                        self.showAlert.toggle()
+                        return
+                    }
+                    let item = ExpenseItem(name: self.name, type: self.type, amount: actualAmount)
+                    self.expenses.items.append(item)
+                    //this line is needed to trigger the save button and solve the bug
+                    self.expenses.items = self.expenses.items
+                    self.presentationMode.wrappedValue.dismiss()
             })
+                .alert(isPresented: $showAlert) {
+                    Alert(title: Text("Invalid Input"), message: Text(alertMessage), dismissButton: .default(Text("Okay")))
+            }
         }
     }
 }

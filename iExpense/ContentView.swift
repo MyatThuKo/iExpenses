@@ -12,7 +12,26 @@ struct ExpenseItem: Identifiable, Codable {
     let id = UUID()
     let name: String
     let type: String
-    let amount: Int
+    let amount: Double
+}
+
+struct checkAmount: View {
+    var text: String
+    var amount: Double
+    
+    var body: some View {
+        if amount < 10 {
+            return Text(text)
+                .foregroundColor(.gray)
+        } else if (amount > 10 && amount < 101) {
+            return Text(text)
+                .foregroundColor(.green)
+        } else {
+            // amount > 100
+            return Text(text)
+                .foregroundColor(.red)
+        }
+    }
 }
 
 class Expenses: ObservableObject {
@@ -56,13 +75,13 @@ struct ContentView: View {
                             Text(item.type)
                         }
                         Spacer()
-                        Text("$\(item.amount)")
+                        checkAmount(text: "$\(item.amount)", amount: item.amount)
                     }
                 }
                 .onDelete(perform: removeItems)
             }
             .navigationBarTitle("iExpense")
-            .navigationBarItems(trailing:
+            .navigationBarItems(leading: EditButton(), trailing:
                 Button(action: {
                     self.showingAddExpense = true 
                 }) {
